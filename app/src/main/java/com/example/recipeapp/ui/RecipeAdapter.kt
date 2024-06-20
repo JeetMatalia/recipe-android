@@ -6,7 +6,9 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import coil.load
 import com.example.RecipeApp.model.Recipe
+import com.example.recipeapp.R
 import com.example.recipeapp.databinding.ItemRecipeBinding
+import com.facebook.shimmer.Shimmer
 
 class RecipeAdapter(private val onRecipeClickListener: OnRecipeClickListener) : RecyclerView.Adapter<RecipeAdapter.RecipeViewHolder>() {
 
@@ -29,6 +31,9 @@ class RecipeAdapter(private val onRecipeClickListener: OnRecipeClickListener) : 
     override fun getItemCount(): Int = recipes.size
 
     inner class RecipeViewHolder(private val binding: ItemRecipeBinding) : RecyclerView.ViewHolder(binding.root) {
+
+        private val shimmer: Shimmer = Shimmer.AlphaHighlightBuilder().build()
+
         init {
             binding.recipeImage.setOnClickListener {
                 val position = adapterPosition
@@ -40,7 +45,29 @@ class RecipeAdapter(private val onRecipeClickListener: OnRecipeClickListener) : 
 
         fun bind(recipe: Recipe) {
             binding.recipeTitle.text = recipe.title
-            binding.recipeImage.load(recipe.image)
+
+            // Start shimmer animation
+            binding.shimmerLayout.apply {
+                setShimmer(shimmer)
+                startShimmer()
+            }
+
+            binding.recipeImage.load(recipe.image) {
+                // Specify the placeholder drawable while the image is loading
+                placeholder(R.drawable.placeholder)
+
+                // Specify the error drawable to be shown if the image loading fails
+                error(R.drawable.placeholder)
+
+                // After image loading completes (whether success or failure), stop shimmer animation
+                listener(onSuccess = { _, _ ->
+                    binding.shimmerLayout.stopShimmer()
+                    binding.shimmerLayout.hideShimmer() // Optional: Hide shimmer layout
+                }, onError = { _, _ ->
+                    binding.shimmerLayout.stopShimmer()
+                    binding.shimmerLayout.hideShimmer() // Optional: Hide shimmer layout
+                })
+            }
         }
     }
 

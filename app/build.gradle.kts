@@ -79,6 +79,9 @@ dependencies {
         implementation(libs.androidx.lifecycle.runtime.ktx)
         // Annotation processor
         kapt(libs.androidx.lifecycle.compiler)
+
+    //Shimmer Effect
+    implementation(libs.shimmer)
 }
 
 kapt {

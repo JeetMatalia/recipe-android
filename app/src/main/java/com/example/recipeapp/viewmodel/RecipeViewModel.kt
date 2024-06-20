@@ -21,9 +21,13 @@ class RecipeViewModel @Inject constructor(private val repository: RecipeReposito
     private val _recipeDetails = MutableLiveData<RecipeDetails>()
     val recipeDetails: LiveData<RecipeDetails> get() = _recipeDetails
 
+    private val _isLoading = MutableLiveData<Boolean>()
+    val isLoading: LiveData<Boolean> get() = _isLoading
+
     private val apiKey = "19db821e74384d1c8357581631af131e"
 
     fun fetchRecipes(query: String, maxFat: Int, number: Int) {
+        _isLoading.value = true
         viewModelScope.launch {
             try {
                 val response = repository.getRecipes(query, maxFat, number, apiKey)
@@ -34,22 +38,26 @@ class RecipeViewModel @Inject constructor(private val repository: RecipeReposito
                 }
             } catch (e: Exception) {
                 Log.e("RecipeViewModel", "Error fetching recipes", e)
+            } finally {
+                _isLoading.value = false
             }
         }
     }
 
     fun fetchRecipeDetails(recipeId: Int) {
+        _isLoading.value = true
         viewModelScope.launch {
             try {
                 val response = repository.getRecipeDetails(recipeId, apiKey)
                 if (response.isSuccessful) {
                     _recipeDetails.postValue(response.body())
-                    Log.d("bkbdeksbckdsbc", response.body().toString())
                 } else {
                     Log.e("RecipeViewModel", "Failed to fetch recipe details: ${response.code()} - ${response.message()}")
                 }
             } catch (e: Exception) {
                 Log.e("RecipeViewModel", "Error fetching recipe details", e)
+            } finally {
+                _isLoading.value = false
             }
         }
     }

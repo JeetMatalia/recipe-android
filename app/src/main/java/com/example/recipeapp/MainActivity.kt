@@ -3,6 +3,7 @@ package com.example.RecipeApp
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -29,6 +30,10 @@ class MainActivity : AppCompatActivity(), RecipeAdapter.OnRecipeClickListener {
 
         recipeViewModel.recipes.observe(this) { recipes ->
             recipeAdapter.submitList(recipes)
+        }
+
+        recipeViewModel.isLoading.observe(this) { isLoading ->
+            binding.progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
         }
 
         recipeViewModel.fetchRecipes("pasta", 25, 85)
