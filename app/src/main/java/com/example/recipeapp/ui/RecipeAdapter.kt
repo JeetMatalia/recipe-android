@@ -1,4 +1,3 @@
-// app/src/main/java/com/example/RecipeApp/ui/RecipeAdapter.kt
 package com.example.RecipeApp.ui
 
 import android.view.LayoutInflater

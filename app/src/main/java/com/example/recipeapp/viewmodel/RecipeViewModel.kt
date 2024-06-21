@@ -6,7 +6,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.RecipeApp.model.Recipe
-import com.example.recipeapp.model.RecipeDetails
+import com.example.RecipeApp.model.RecipeDetails
 import com.example.RecipeApp.repository.RecipeRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -18,24 +18,20 @@ class RecipeViewModel @Inject constructor(private val repository: RecipeReposito
     private val _recipes = MutableLiveData<List<Recipe>>()
     val recipes: LiveData<List<Recipe>> get() = _recipes
 
-    private val _recipeDetails = MutableLiveData<RecipeDetails>()
-    val recipeDetails: LiveData<RecipeDetails> get() = _recipeDetails
+    private val _recipeDetails = MutableLiveData<RecipeDetails?>()
+    val recipeDetails: LiveData<RecipeDetails?> get() = _recipeDetails
 
     private val _isLoading = MutableLiveData<Boolean>()
     val isLoading: LiveData<Boolean> get() = _isLoading
 
-    private val apiKey = "19db821e74384d1c8357581631af131e"
+    private val apiKey = "81650a60ea8446e980d68c081125c56e"
 
     fun fetchRecipes(query: String, maxFat: Int, number: Int) {
         _isLoading.value = true
         viewModelScope.launch {
             try {
-                val response = repository.getRecipes(query, maxFat, number, apiKey)
-                if (response.isSuccessful) {
-                    _recipes.postValue(response.body()?.results)
-                } else {
-                    Log.e("RecipeViewModel", "Failed to fetch recipes: ${response.code()} - ${response.message()}")
-                }
+                val recipes = repository.getRecipes(query, maxFat, number, apiKey)
+                _recipes.postValue(recipes)
             } catch (e: Exception) {
                 Log.e("RecipeViewModel", "Error fetching recipes", e)
             } finally {
@@ -48,12 +44,8 @@ class RecipeViewModel @Inject constructor(private val repository: RecipeReposito
         _isLoading.value = true
         viewModelScope.launch {
             try {
-                val response = repository.getRecipeDetails(recipeId, apiKey)
-                if (response.isSuccessful) {
-                    _recipeDetails.postValue(response.body())
-                } else {
-                    Log.e("RecipeViewModel", "Failed to fetch recipe details: ${response.code()} - ${response.message()}")
-                }
+                val recipeDetails = repository.getRecipeDetails(recipeId, apiKey)
+                _recipeDetails.postValue(recipeDetails)
             } catch (e: Exception) {
                 Log.e("RecipeViewModel", "Error fetching recipe details", e)
             } finally {

@@ -1,7 +1,7 @@
 package com.example.RecipeApp.network
 
-import com.example.recipeapp.model.RecipeDetails
 import com.example.RecipeApp.model.RecipeResponse
+import com.example.RecipeApp.model.RecipeDetails
 import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Path

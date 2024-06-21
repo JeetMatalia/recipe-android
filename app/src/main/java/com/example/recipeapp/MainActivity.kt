@@ -3,7 +3,6 @@ package com.example.RecipeApp
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
-import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -25,25 +24,29 @@ class MainActivity : AppCompatActivity(), RecipeAdapter.OnRecipeClickListener {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        binding.recyclerView.layoutManager = LinearLayoutManager(this)
-        binding.recyclerView.adapter = recipeAdapter
+        setupRecyclerView()
 
         recipeViewModel.recipes.observe(this) { recipes ->
             recipeAdapter.submitList(recipes)
         }
 
         recipeViewModel.isLoading.observe(this) { isLoading ->
-            binding.progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
+            binding.progressBar.visibility = if (isLoading) android.view.View.VISIBLE else android.view.View.GONE
         }
 
         recipeViewModel.fetchRecipes("pasta", 25, 85)
     }
 
-    override fun onRecipeClick(recipe: Recipe) {
-        Log.d("MainActivity", "Clicked recipe: ${recipe.title}, id: ${recipe.id}")
-        val intent = Intent(this, RecipeDetailActivity::class.java).apply {
-            putExtra("RECIPE_ID", recipe.id)
-        }
-        startActivity(intent)
+    private fun setupRecyclerView() {
+        binding.recyclerView.layoutManager = LinearLayoutManager(this)
+        binding.recyclerView.adapter = recipeAdapter
     }
+
+override fun onRecipeClick(recipe: Recipe) {
+    Log.d("MainActivity", "Clicked recipe: ${recipe.title}, id: ${recipe.id}")
+    val intent = Intent(this, RecipeDetailActivity::class.java).apply {
+        putExtra("RECIPE_ID", recipe.id)
+    }
+    startActivity(intent)
+}
 }

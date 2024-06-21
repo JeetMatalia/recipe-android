@@ -1,70 +1,64 @@
 package com.example.RecipeApp
 
 import android.os.Bundle
-import android.text.Html
+import android.text.SpannableString
+import android.text.style.UnderlineSpan
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.text.HtmlCompat
+import androidx.lifecycle.observe
 import coil.load
 import com.example.RecipeApp.viewmodel.RecipeViewModel
 import com.example.recipeapp.databinding.ActivityRecipeDetailBinding
+
 import dagger.hilt.android.AndroidEntryPoint
-import android.text.method.LinkMovementMethod
-import android.view.View
-import com.example.recipeapp.R
-import com.facebook.shimmer.Shimmer
 
 @AndroidEntryPoint
 class RecipeDetailActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityRecipeDetailBinding
     private val recipeViewModel: RecipeViewModel by viewModels()
-    private lateinit var shimmer: Shimmer
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityRecipeDetailBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Initialize shimmer effect
-        shimmer = Shimmer.AlphaHighlightBuilder().build()
-
+        // Get recipe ID from intent
         val recipeId = intent.getIntExtra("RECIPE_ID", -1)
         if (recipeId != -1) {
+            // Fetch recipe details from ViewModel
             recipeViewModel.fetchRecipeDetails(recipeId)
         }
 
+        // Observe isLoading LiveData to control loading indicators
         recipeViewModel.isLoading.observe(this) { isLoading ->
-            binding.progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
+            if (isLoading) {
+                // Show ProgressBar and start shimmer animation
+                binding.progressBar.visibility = android.view.View.VISIBLE
+                binding.shimmerLayout.startShimmer()
+            } else {
+                // Hide ProgressBar and stop shimmer animation
+                binding.progressBar.visibility = android.view.View.GONE
+                binding.shimmerLayout.stopShimmer()
+                binding.shimmerLayout.hideShimmer()
+            }
         }
 
+        // Observe recipeDetails LiveData to update UI when data is loaded
         recipeViewModel.recipeDetails.observe(this) { recipeDetails ->
             if (recipeDetails != null) {
+
+                val recipeDetailText = "Recipe Detail"
+                val spannableString = SpannableString(recipeDetailText)
+                spannableString.setSpan(UnderlineSpan(), 0, recipeDetailText.length, 0)
+                binding.RecipeDetail.text = spannableString
+                // Set recipe title and image using Coil
                 binding.recipeTitle.text = recipeDetails.title
+                binding.recipeImage.load(recipeDetails.image)
 
-                // Start shimmer animation while loading the image
-                binding.shimmerLayout.startShimmer()
-
-                // Load recipe image with Coil
-                binding.recipeImage.load(recipeDetails.image) {
-                    // Specify placeholder drawable for shimmer effect
-                    placeholder(R.drawable.placeholder)
-
-                    // Crossfade duration for smooth transition
-                    crossfade(true)
-
-                    // After image loading completes, stop shimmer animation
-                    listener(onSuccess = { _, _ ->
-                        binding.shimmerLayout.stopShimmer()
-                        binding.shimmerLayout.hideShimmer() // Optional: Hide shimmer layout
-                    }, onError = { _, _ ->
-                        binding.shimmerLayout.stopShimmer()
-                        binding.shimmerLayout.hideShimmer() // Optional: Hide shimmer layout
-                    })
-                }
-
-                // Use Html.fromHtml to display HTML content
-                binding.recipeSummary.text = Html.fromHtml(recipeDetails.summary, Html.FROM_HTML_MODE_LEGACY)
-                binding.recipeSummary.movementMethod = LinkMovementMethod.getInstance()
+                // Use HtmlCompat to display HTML content in TextView
+                binding.recipeSummary.text = HtmlCompat.fromHtml(recipeDetails.summary, HtmlCompat.FROM_HTML_MODE_LEGACY)
             }
         }
     }
