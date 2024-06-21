@@ -61,10 +61,10 @@ class RecipeAdapter(private val onRecipeClickListener: OnRecipeClickListener) : 
                 // After image loading completes (whether success or failure), stop shimmer animation
                 listener(onSuccess = { _, _ ->
                     binding.shimmerLayout.stopShimmer()
-                    binding.shimmerLayout.hideShimmer() // Optional: Hide shimmer layout
+                    binding.shimmerLayout.hideShimmer()
                 }, onError = { _, _ ->
                     binding.shimmerLayout.stopShimmer()
-                    binding.shimmerLayout.hideShimmer() // Optional: Hide shimmer layout
+                    binding.shimmerLayout.hideShimmer()
                 })
             }
         }

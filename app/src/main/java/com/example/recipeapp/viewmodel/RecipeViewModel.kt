@@ -24,7 +24,11 @@ class RecipeViewModel @Inject constructor(private val repository: RecipeReposito
     private val _isLoading = MutableLiveData<Boolean>()
     val isLoading: LiveData<Boolean> get() = _isLoading
 
-    private val apiKey = "81650a60ea8446e980d68c081125c56e"
+    private val apiKey = "7c2a674e44234dd6b9ac3ba67ecd7aec"
+
+    init {
+        fetchRecipesFromLocal()
+    }
 
     fun fetchRecipes(query: String, maxFat: Int, number: Int) {
         _isLoading.value = true
@@ -50,6 +54,17 @@ class RecipeViewModel @Inject constructor(private val repository: RecipeReposito
                 Log.e("RecipeViewModel", "Error fetching recipe details", e)
             } finally {
                 _isLoading.value = false
+            }
+        }
+    }
+
+    private fun fetchRecipesFromLocal() {
+        viewModelScope.launch {
+            try {
+                val recipes = repository.getCachedRecipes()
+                _recipes.postValue(recipes)
+            } catch (e: Exception) {
+                Log.e("RecipeViewModel", "Error fetching recipes from local", e)
             }
         }
     }
